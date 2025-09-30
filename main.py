@@ -13,6 +13,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ✅ Add this route
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
 @app.post("/download")
 async def download_video(request: Request):
     data = await request.json()
@@ -22,12 +27,10 @@ async def download_video(request: Request):
         return {"error": "No URL provided"}
 
     try:
-        # Extract video info without downloading
         ydl_opts = {"quiet": True, "skip_download": True}
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
-        # Pick the best MP4 format available
         formats = info.get("formats", [])
         download_url = None
         for f in formats:
@@ -43,4 +46,3 @@ async def download_video(request: Request):
 
     except Exception as e:
         return {"error": str(e)}
-
